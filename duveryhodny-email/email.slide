@@ -1,0 +1,112 @@
+Důvěryhodný e-mail
+3 Apr 2015
+Tags: SMTP DKIM SPF DMARC e-mail
+
+Robert Kánia
+redb, s.r.o.
+rk@redb.cz
+http://www.redb.cz
+
+#----------------------------------------------------------
+* Cíl
+
+- *spolehlivost* doručení e-mailů
+- *ochrana* klientů před podvodnými zprávami
+- *kontrola* kdo a kolik odesílá
+
+.image data/at.png
+
+#----------------------------------------------------------
+* Co je e-mail
+
+#----------------------------------------------------------
+* e-mail
+
+.image data/email_structure.gif 
+
+#----------------------------------------------------------
+* Obálka
+
+Typicky není vidět v klientských programech. Používá se pro vlastní přenos e-mailů po síti mezi odesílatelem a příjemcem.
+
+- MAIL FROM
+- RCPT TO
+
+ Je obyklé, že odesílající server uloží údaje z MAIL FROM do hlavičky Return-Path.
+ RCPT TO bývá uloženo v hlavičce Received: (for ...)
+
+.caption Více viz RFC 5321 [[http://tools.ietf.org/html/rfc5321]]
+
+#----------------------------------------------------------
+* Zpráva - hlavičky
+
+*From:*
+Martin Mayer | Proof & Reason" <martin.mayer@proofreason.com>
+
+*Reply-To:*
+mayer.martin@gmail.com
+
+*To*
+=?UTF-8?Q?Robert_K=C3=A1nia?= <rk@redb.cz>
+
+*Subject:*
+Nemotající se hadice - bombastická!
+
+*Date:*
+Thu, 2 Apr 2015 13:33:31 +0000 (UTC)
+
+ Obdobně jako u HTTP je možné přidávat vlastní nestandardizované hlavičky X-MojeHlavicka
+
+.caption Více viz RFC 5322 [[http://tools.ietf.org/html/rfc5322]]
+  
+#----------------------------------------------------------
+* Zpráva - obsah
+
+Vlastní obsah zprávy - text a/nebo HTML, přílohy, inline obrázky...
+
+ U jiných zpráv než čistě textových (tj Content-Type != text/plain) je obsah zprávy složen
+ z multipart bloků, rozlišených oddělovačem definovaným jako "boundary" v hlavičce Content-Type.
+  
+ Každý blok má svůj vlastní Content-Type, charset i Content-Transfer-Encoding.
+
+ ...
+ Content-Type: multipart/alternative; boundary=001a11343bc65c700005120f8cc2
+ ...
+ --001a11343bc65c700005120f8cc2
+ Content-Type: text/plain; charset=UTF-8; format=flowed; delsp=yes
+
+ I've shared an item with you:
+ ...
+ --001a11343bc65c700005120f8cc2
+ Content-Type: text/html; charset=UTF-8
+ Content-Transfer-Encoding: quoted-printable
+ <html><head></head><body><div style=3D"width: 100%; padding: 24px 0 16px 0;=
+ ...
+ --001a11343bc65c700005120f8cc2--
+
+#----------------------------------------------------------
+* Cesta e-mailu od odesílatele k příjemci
+
+#----------------------------------------------------------
+* SMTP
+
+Simple Mail Transfer Protocol
+
+Protokol, zabývající se přenosem zprávy od odesílatele k příjemci.
+SMTP neřeší vlastní zprávu (hlavičky, obsah), zabývá se pouze obálkou.
+
+
+ Protokol SMTP zprávy standarně přenáší přes jeden ze tří TCP portů:
+
+  25 - výchozí SMTP port.
+       Vhodné používat pouze na SMTP serveru pro příjem zpráv. Možná nešifrovaná i TLS komunikace.
+
+ 465 - Výhradně zabezpečené odesílání zpráv, vhodné používat maximálně v mailových klientech
+
+ 587 - tzv. "submission". Nejvhodnější port pro předání zprávy z klienta na server i mezi servery.
+       Umožňuje nešifovanou i TLS komunikaci.
+
+#----------------------------------------------------------
+* Naivní diagram
+
+.image data/whatissmtp.png

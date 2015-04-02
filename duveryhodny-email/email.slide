@@ -93,8 +93,7 @@ Vlastní obsah zprávy - text a/nebo HTML, přílohy, inline obrázky...
 Simple Mail Transfer Protocol
 
 Protokol, zabývající se přenosem zprávy od odesílatele k příjemci.
-SMTP neřeší vlastní zprávu (hlavičky, obsah), zabývá se pouze obálkou.
-
+SMTP neřeší vlastní zprávu (hlavičky, obsah), zabývá se pouze její obálkou.
 
  Protokol SMTP zprávy standarně přenáší přes jeden ze tří TCP portů:
 
@@ -110,3 +109,51 @@ SMTP neřeší vlastní zprávu (hlavičky, obsah), zabývá se pouze obálkou.
 * Naivní diagram
 
 .image data/whatissmtp.png
+
+
+#----------------------------------------------------------
+* SPAM / Phishing / Viruses
+
+#----------------------------------------------------------
+* Historie spamu
+
+*začínáme*
+SMTP servery jsou otevřené pro kohokoliv
+_Problém_: Kdokoliv může poslat mail komukoliv přes libovolný server pod libovolnou identitou
+
+*bráníme*se*
+Můžu posílat pouze přes SMTP server svého providera
+_Problém_: Mám notebook a měním místo připojení několikrát za den
+
+*zabezpečujeme*
+SMTP servery umožnují autentizaci, tyto můzu používat odkudkoliv
+_Problém_: Spammer si může udělat vlastní SMTP přes který posílá
+
+*vždy*krok*za*spammery*
+Zavedeme blacklisty - Spammeři hackují cizí SMTP servery
+Hledáme slovo Viagra - Spameři pošlou obrázek
+Zavádíme statistické techniky - Odpovědí je Bayesian poisoning
+
+#----------------------------------------------------------
+* Obrana
+
+#----------------------------------------------------------
+* Blokace SMTP komunikace
+
+Jednou z forem obrany je blokování TCP portů používaných pro transport zpráv.
+Obecně je velmi častá blokace portu 25, porty 465 a 587 jsou blokovány zřídka.
+Na velmi veřejných místech typu letiště, internetové kavárny a knihovny je vetší pravděpodobnost blokace.
+
+U veřejných míst obvykle nebývá nabízen místní SMTP server.
+U privátních (společnosti, korporace) naopak prakticky vždy ano.
+
+*Možnosti*obejití*blokace*
+Pro laiky:
+
+- webmail
+- VPN
+
+Pro ajťáky:
+
+- nestandardní SMTP port na vlastním serveru
+- tunelování (např. přes SSH)

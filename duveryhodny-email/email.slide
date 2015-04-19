@@ -10,11 +10,59 @@ http://www.redb.cz
 #----------------------------------------------------------
 * Cíl
 
+- ujasnit si fungování e-mailu
+- rozptýlení FUDů
+- dokázat vysvětlit klientům základní principy
+- reflektovat vývoj technologií při tvorbě aplikací
+
+*Důvěryhodný*e-mail* 
+
 - *spolehlivost* doručení e-mailů
 - *ochrana* klientů před podvodnými zprávami
 - *kontrola* kdo a kolik odesílá
 
-.image data/at.png
+*Doplňující*informace*
+
+ Podrobnější a doplňující informace jsou uvedeny v takovýchto blocích.
+ Budou zajímavé asi jen pro programátory a či administrátory.
+
+
+#----------------------------------------------------------
+
+* Obsah
+
+Předmětem je pouze vlastní přenos pošty po síti k příjemci.
+Neřešíme vyzvedávání pošty, ukládání do odeslaných atp.
+
+*Základy*
+
+- Protokoly a standardy
+- Podoba e-mailu
+- Přenos e-mailů po síti
+- Zneužití e-mailů (Spam, Phishing, Viry, ...)
+
+*Důvěryhodný*e-mail*
+
+- Obrana na serveru
+- TLS
+- DKIM, SPF
+- Reputační systémy
+
+#----------------------------------------------------------
+* Historie
+
+- 1971 - FTP
+- *1971*-*MTP* (založeno na FTP)
+- 1973 - Telnet
+- *1981*-*SMTP* (RFC 821 - _INTERNET_STANDARD_)
+- 1983 - DNS
+- 1984 - POP
+- 1986 - IMAP
+- 1991 - HTTP
+- 1995 - SSH
+- *2001*-*ESMTP* (RFC 2821 - _PROPOSED_STANDARD_; AUTH, DSN, SIZE, CHUNKING, ...)
+- *2002*-*Secure*ESMTP* (RFC 3207 - _PROPOSED_STANDARD_; TLS)
+- *2008*-*revize*ESMTP* (RFC 5321 - _DRAFT_STANDARD_)
 
 #----------------------------------------------------------
 * Co je e-mail
@@ -22,12 +70,12 @@ http://www.redb.cz
 #----------------------------------------------------------
 * e-mail
 
-.image data/email_structure.gif 
+.image data/email_structure.png _ 1100
 
 #----------------------------------------------------------
 * Obálka
 
-Typicky není vidět v klientských programech. Používá se pro vlastní přenos e-mailů po síti mezi odesílatelem a příjemcem.
+Není vidět v klientských programech. Používá se pro vlastní přenos e-mailů po síti mezi odesílatelem a příjemcem.
 
 - MAIL FROM
 - RCPT TO
@@ -62,12 +110,26 @@ Thu, 2 Apr 2015 13:33:31 +0000 (UTC)
 #----------------------------------------------------------
 * Zpráva - obsah
 
-Vlastní obsah zprávy - text a/nebo HTML, přílohy, inline obrázky...
+Vlastní obsah zprávy.
 
- U jiných zpráv než čistě textových (tj Content-Type != text/plain) je obsah zprávy složen
- z multipart bloků, rozlišených oddělovačem definovaným jako "boundary" v hlavičce Content-Type.
+Původně čistý ASCII text (7bit)
+
+Později zejména pomocí MIME rozšíření umožněn bohatší obsah
+
+- text s diakritikou
+- HTML
+- přílohy
+- inline obrázky
+- a další...
+
+
+#----------------------------------------------------------
+* MIME
+
+U jiných zpráv, než čistě textových (tj Content-Type != text/plain) je obsah zprávy složen
+z multipart bloků, rozlišených oddělovačem definovaným jako "boundary" v hlavičce Content-Type.
   
- Každý blok má svůj vlastní Content-Type, charset i Content-Transfer-Encoding.
+Každý blok má svůj vlastní Content-Type, charset i Content-Transfer-Encoding.
 
  ...
  Content-Type: multipart/alternative; boundary=001a11343bc65c700005120f8cc2
@@ -88,45 +150,110 @@ Vlastní obsah zprávy - text a/nebo HTML, přílohy, inline obrázky...
 * Cesta e-mailu od odesílatele k příjemci
 
 #----------------------------------------------------------
-* SMTP
+* Simple Mail Transfer Protocol
 
-Simple Mail Transfer Protocol
+.image data/smtp1.png _ 1000
+
+#----------------------------------------------------------
+* Not so Simple Mail Transfer Protocol
+
+.image data/smtp2.png _ 1000
+
+#----------------------------------------------------------
+* Really not so Simple Mail Transfer Protocol
+
+.image data/smtp3.png _ 1000
+
+#----------------------------------------------------------
+* SMTP 
 
 Protokol, zabývající se přenosem zprávy od odesílatele k příjemci.
-SMTP neřeší vlastní zprávu (hlavičky, obsah), zabývá se pouze její obálkou.
+SMTP *neřeší*vlastní*zprávu* (hlavičky, obsah), zabývá se *pouze* její *obálkou*.
 
- Protokol SMTP zprávy standarně přenáší přes jeden ze tří TCP portů:
+ Protokol SMTP zprávy přenáší přes jeden ze tří TCP portů:
 
   25 - výchozí SMTP port.
-       Vhodné používat pouze na SMTP serveru pro příjem zpráv. Možná nešifrovaná i TLS komunikace.
+       Vhodné používat pouze na SMTP serveru pro příjem zpráv z jiného serveru.
+       Možná nešifrovaná i TLS komunikace.
 
- 465 - Výhradně zabezpečené odesílání zpráv, vhodné používat maximálně v mailových klientech
+ 465 - obdoba HTTPS. 
+       Vhodné používat maximálně v mailových klientech koncových uživatelů.
+       Výhradně zabezpečené odesílání zpráv.
 
- 587 - tzv. "submission". Nejvhodnější port pro předání zprávy z klienta na server i mezi servery.
+ 587 - tzv. Submission port.
+       Nejvhodnější port pro předání zprávy z klienta na server.
        Umožňuje nešifovanou i TLS komunikaci.
 
 #----------------------------------------------------------
-* Naivní diagram
+* Stavové kódy
 
-.image data/whatissmtp.png
+SMTP obdobně jako HTTP používá číselné kódy k signalizaci stavu zpracování.
 
+Kód jsou vždy tři číslice ve formátu *ABC* - např. 250.
+
+*A*
+`2xx` - Úspěšné dokončení příkazu
+`3xx` - Průběžný úspěch
+`4xx` - Dočasná chyba
+`5xx` - trvalá chyba
+
+*B*
+`x0x` - Syntaxe
+`x1x` - Informace
+`x2x` - Spojení
+`x5x` - Přenos zpráv
+
+*C* upřesňuje daný stav.
 
 #----------------------------------------------------------
-* SPAM / Phishing / Viruses
+* Nejčastější stavy
+
+
+`250` - Zpráva přijata k dalšímu zpracování
+`451` - Dočasný problém s příjmem pošty
+`550` - Neexistující schránka
+`552` - Plná schránka
+`554` - Neexistující schránka
+
+Použití třetí číslice není úplně standardizováno, proto pro stejnou chybu můžou být použity různé kódy.
+
+*Stavy*ESMTP*
+
+Protokol ESMTP výše uvedené stavy rozšiřuje a zavádí doplňující formát X.YYYY.ZZZZ kde jsou 3 bloky čísel oddělené tečkou.
+
+ 550 5.1.1 Sorry, no mailbox here by that name.
+ 552 4.2.2 User has full mailbox.
+ 554 5.7.1 Recipient address rejected: Access denied, user does not exist.
+
+ ESMTP kód je možné parsovat z hlavičky Status:
+
+.caption Více viz IANA [[http://www.iana.org/assignments/smtp-enhanced-status-codes/smtp-enhanced-status-codes.xhtml]]
+
+#----------------------------------------------------------
+* Bounce messages
+
+*NDN* - Non-Delivery Notification
+*DSN* - Delivery Status Notification
+
+
+dvojí doručenky
+
+.image data/smtp4.png _ 1000
+
+#----------------------------------------------------------
+* UCE / UBE / Phishing / Viry
 
 #----------------------------------------------------------
 * Historie spamu
 
-*začínáme*
-SMTP servery jsou otevřené pro kohokoliv
+*➜* SMTP servery jsou otevřené pro kohokoliv
 _Problém_: Kdokoliv může poslat mail komukoliv přes libovolný server pod libovolnou identitou
 
-*bráníme*se*
-Můžu posílat pouze přes SMTP server svého providera
+_bráníme_se_
+Povoleno posílat pouze přes SMTP server svého providera
 _Problém_: Mám notebook a měním místo připojení několikrát za den
 
-*zabezpečujeme*
-SMTP servery umožnují autentizaci, tyto můzu používat odkudkoliv
+*➜* SMTP servery umožnují autentizaci, tyto můzu používat odkudkoliv
 _Problém_: Spammer si může udělat vlastní SMTP přes který posílá
 
 *vždy*krok*za*spammery*

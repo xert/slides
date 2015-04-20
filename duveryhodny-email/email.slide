@@ -174,7 +174,7 @@ SMTP *neřeší*vlastní*zprávu* (hlavičky, obsah), zabývá se *pouze* její 
 
   25 - výchozí SMTP port.
        Vhodné používat pouze na SMTP serveru pro příjem zpráv z jiného serveru.
-       Umožňuje nešifovanou i TLS komunikaci.
+       Umožňuje nešifrovanou i TLS komunikaci.
 
  465 - SMTPS, obdoba HTTPS. Považováno za zastaralé od 1998, v praxi se ale stále používá.
        Jen v nutných případech zpětné kompatibility klientských aplikací.
@@ -182,7 +182,7 @@ SMTP *neřeší*vlastní*zprávu* (hlavičky, obsah), zabývá se *pouze* její 
 
  587 - Submission port.
        Nejvhodnější port pro předání zprávy z klienta na server.
-       Umožňuje nešifovanou i TLS komunikaci.
+       Umožňuje nešifrovanou i TLS komunikaci.
 
 #----------------------------------------------------------
 * Stavové kódy
@@ -195,7 +195,7 @@ Kód jsou vždy tři číslice ve formátu *ABC* - např. 250.
 `2xx` - Úspěšné dokončení příkazu
 `3xx` - Průběžný úspěch
 `4xx` - Dočasná chyba
-`5xx` - trvalá chyba
+`5xx` - Trvalá chyba
 
 *B*
 `x0x` - Syntaxe
@@ -236,7 +236,7 @@ Protokol ESMTP výše uvedené stavy rozšiřuje a zavádí doplňující formá
 
 Jedná se o formu automatických odpovědí.
 
-V mailovém klientovi je obvykle možnost nastavit tzv. doručenku.
+V e-mailovém klientovi je obvykle možnost nastavit tzv. doručenku.
 
 *Ve*zprávě* - Return Receipt
 Hlavička zprávy
@@ -378,7 +378,7 @@ Přináší komplexnost do konfigurace a údržby
 - certifikáty
 - aktuálnost použitých šifer
 
-Při správném použití nijak neomezůjí ani nematou uživatele
+Při správném použití nijak neomezují ani nematou uživatele.
 
 #----------------------------------------------------------
 * ...dále
@@ -439,7 +439,7 @@ U privátních (společnosti, korporace) naopak prakticky vždy ano.
 - odesílatelé, příjemci
 
 *Whitelist*
-- explicitně povolené totéž
+- explicitně povoleno, stejná kritéria jako Blacklist
 - často se zpráva dále neprověřuje
 
 *DNS*Blocklist* (DNSBL)
@@ -482,13 +482,118 @@ U privátních (společnosti, korporace) naopak prakticky vždy ano.
 * Moderní techniky
 
 #----------------------------------------------------------
+* Sender Policy Framework (SPF)
+
+_Technologie_z_roku_2003_
+
+- řeší pouze *obálku* zprávy, nezabývá se jejím obsahem
+- realizováno jako DNS záznam
+- určuje jaké IP adresy mohou odesílat poštu *z*této*domény*
+- na straně příjemce je možné zpracování během SMTP komunikace nebo až později (např. v hybridním systému)
+
+Poměrně kontroverzní technologie, bohužel technicky nedotažená do konce.
+Šanci na standardizaci zvyšuje podpora velkých společností.
 
 #----------------------------------------------------------
-* SPF
+* SPF Syntaxe
+
+U adres je definována jedna z možností, jak se má k tomuto odesílateli chovat.
+
+- může odesílat poštu (výchozí, používá se identifikátor `+`)
+- není definováno (`?`)
+- nesmí posílat poštu (`-`)
+- neměl by posílat poštu (testovací režim `~`)
+
+Pokud není záznam uveden, odpovídá to záznamu
+
+  v=spf1 ?all
+
+Tedy pro všechny adresy není definováno chování.
+Příjemce zpracovávající SPF by měl přijmout e-mail ode všech serverů.
+
+#----------------------------------------------------------
+* Rozšířená SPF syntaxe
+
+Definováno osm mechanismů (klíčových slov):
+
+ ALL - Všechny dříve neuvedené adresy
+ A   - Zástupný symbol pro IP adresu (A nebo AAAA záznam) domény
+ IP4 - Za dvojtečkou následuje IPv4 síť či adresa
+ IP6 - Za dvojtečkou následuje IPv6 síť či adresa
+ MX  - Zástupný symbol pro MX záznamy domény
+ PTR - Zastaralé: pokud reverzní záznam k IP klienta náleží do domény
+ INCLUDE - Vložení SPF politiky z jiné domény
+
+Modifikátory
+
+  redirect - použít SPF záznam z uvedené domény
+  exp - použít chybové hlášení z TXT záznamu této domény (používáno zřídka)
+
+#----------------------------------------------------------
+* Testovací režim
+
+Projektům, přecházejícím na SPF je doporučené používat testovací režim,
+tedy adresy, které budou v budoucnu zakázané (`-`) označit jako "soft fail" (`~`).
+
+V tomto režimu jsou nevyhovující zprávy doručeny, ale jsou v hlavičkách příslušně označeny.
+
+#----------------------------------------------------------
+* Seznam.cz
+
+  v=spf1 mx ip4:77.75.72.0/23 ip4:77.75.76.0/23 ?all
+
+- Povolené pouze z vyjmenovaných sítí a MX pro doménu seznam.cz
+- Pro ostatní adresy není chování definováno.
+- Efektivně odpovídá nepřítomnosti SPF záznamu.
+- Použití mechanismu MX je nevhodné - je třeba další DNS dotaz.
+
+#----------------------------------------------------------
+* Gmail.com
+
+  v=spf1 redirect=_spf.google.com
+
+- Používá politiku definovanou v doméně `_spf.google.com`
+
+  v=spf1 include:_netblocks.google.com include:_netblocks2.google.com include:_netblocks3.google.com ~all
+
+- Politika obsahuje adresy definované u uvedených domén (netblocks)
+- Ostatní adresy jsou v testovacím režimu
+
+#----------------------------------------------------------
+* Možnosti zneužití
+
+*Spam*
+Pro zasílání spamu si může spammer zaregistrovat doménu,
+ve které definuje (pokud vůbec) záznam povolující odesílání z jakékoliv adresy
+
+  v=spf1 +all
+
+*Phishing*
+Pro phishing je SPF relativně dobrou obranou,
+pokud se útočník nerozhodne použít doménu podobnou službě, za kterou se vydává.
+
+#----------------------------------------------------------
+* Přeposílání pošty
+
+#----------------------------------------------------------
+* Formuláře na WWW
+
+#----------------------------------------------------------
+* Doporučení pro implementaci
+
+- identifikovat všechny SMTP servery, přes které se odesílá pošta
+- minimalizovat jejich počet
+- vytvořit záznam s výčtem serverů a softfail politikou pro ostatní IP
 
 
 #----------------------------------------------------------
 * DKIM
 
+_Technologie_z_roku_2007_
+
+- řeší pouze *obsah* zprávy, nezabývá se její obálkou
+
 #----------------------------------------------------------
 * DMARC
+
+_Technologie_z_roku_2011_

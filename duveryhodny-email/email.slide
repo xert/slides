@@ -101,7 +101,7 @@ mayer.martin@gmail.com
 Nemotající se hadice - bombastická!
 
 *Date:*
-Thu, 2 Apr 2015 13:33:31 +0000 (UTC)
+Thu, 1 Apr 2015 13:33:31 +0000 (UTC)
 
  Obdobně jako u HTTP je možné přidávat vlastní nestandardizované hlavičky X-MojeHlavicka
 
@@ -174,13 +174,13 @@ SMTP *neřeší*vlastní*zprávu* (hlavičky, obsah), zabývá se *pouze* její 
 
   25 - výchozí SMTP port.
        Vhodné používat pouze na SMTP serveru pro příjem zpráv z jiného serveru.
-       Možná nešifrovaná i TLS komunikace.
+       Umožňuje nešifovanou i TLS komunikaci.
 
- 465 - obdoba HTTPS. 
-       Vhodné používat maximálně v mailových klientech koncových uživatelů.
+ 465 - SMTPS, obdoba HTTPS. Považováno za zastaralé od 1998, v praxi se ale stále používá.
+       Jen v nutných případech zpětné kompatibility klientských aplikací.
        Výhradně zabezpečené odesílání zpráv.
 
- 587 - tzv. Submission port.
+ 587 - Submission port.
        Nejvhodnější port pro předání zprávy z klienta na server.
        Umožňuje nešifovanou i TLS komunikaci.
 
@@ -208,35 +208,119 @@ Kód jsou vždy tři číslice ve formátu *ABC* - např. 250.
 #----------------------------------------------------------
 * Nejčastější stavy
 
+Použití třetí číslice není úplně standardizováno, proto pro stejnou chybu můžou být použity různé kódy.
 
 `250` - Zpráva přijata k dalšímu zpracování
 `451` - Dočasný problém s příjmem pošty
+`530` - Vyžadována autentizace
 `550` - Neexistující schránka
 `552` - Plná schránka
 `554` - Neexistující schránka
 
-Použití třetí číslice není úplně standardizováno, proto pro stejnou chybu můžou být použity různé kódy.
-
-*Stavy*ESMTP*
+#----------------------------------------------------------
+* Stavy ESMTP
 
 Protokol ESMTP výše uvedené stavy rozšiřuje a zavádí doplňující formát X.YYYY.ZZZZ kde jsou 3 bloky čísel oddělené tečkou.
 
+ 530 5.7.0 Must issue a STARTTLS command first
  550 5.1.1 Sorry, no mailbox here by that name.
  552 4.2.2 User has full mailbox.
  554 5.7.1 Recipient address rejected: Access denied, user does not exist.
 
- ESMTP kód je možné parsovat z hlavičky Status:
+ ESMTP kód je možné parsovat z hlavičky `Status:` vráceného mailu.
 
 .caption Více viz IANA [[http://www.iana.org/assignments/smtp-enhanced-status-codes/smtp-enhanced-status-codes.xhtml]]
 
 #----------------------------------------------------------
 * Bounce messages
 
-*NDN* - Non-Delivery Notification
-*DSN* - Delivery Status Notification
+Jedná se o formu automatických odpovědí.
 
+V mailovém klientovi je obvykle možnost nastavit tzv. doručenku.
 
-dvojí doručenky
+*Ve*zprávě* - Return Receipt
+Hlavička zprávy
+
+  Disposition-Notification-To: adresa@prijemce
+
+*V*SMTP*komunikaci*
+Delivery Status Notification (DSN)
+
+Potvrzení o
+
+- přijetí zprávy
+- prodlení zprávy
+- nedoručení zprávy
+
+#----------------------------------------------------------
+* Delivery / Non-Delivery status notifications
+
+*Odesílatel* je vždy MAILER-DAEMON@server
+
+*Subject* není definován, obvykle se jedná o:
+
+- Successful Mail Delivery Report
+- Undelivered Mail Returned to Sender
+- Delivery Status Notification (Delay)
+
+#----------------------------------------------------------
+* Doručení zprávy
+
+  This is the mail system at host mail.redb.cz.
+  
+  Your message was successfully delivered to the destination(s)
+  listed below. If the message was delivered to mailbox you will
+  receive no further notifications. Otherwise you may still receive
+  notifications of mail delivery errors from other systems.
+  
+                     The mail system
+  
+  <xert.cz@gmail.com>: delivery via gmail-smtp-in.l.google.com[74.125.136.26]:25:
+      250 2.0.0 OK 1429517536 p1si30874666wjp.207 - gsmtp
+
+#----------------------------------------------------------
+* Zpoždění zprávy
+
+ This is an automatically generated Delivery Status Notification.
+ 
+ THIS IS A WARNING MESSAGE ONLY.
+ YOU DO NOT NEED TO RESEND YOUR MESSAGE.
+ 
+ Delivery to the following recipients has been delayed.
+
+#----------------------------------------------------------
+* Nedoručení zprávy
+
+ This is the mail system at host mail.redb.cz.
+
+ I'm sorry to have to inform you that your message could not
+ be delivered to one or more recipients. It's attached below.
+ 
+ For further assistance, please send mail to postmaster.
+ 
+ If you do so, please include this problem report. You can
+ delete your own text from the attached returned message.
+ 
+                    The mail system
+ 
+ <test-neexistujici-schranky@seznam.cz>: host mx1.seznam.cz[77.75.76.42] said:
+     550 5.1.1 Sorry, no mailbox here by that name. (in reply to RCPT TO
+     command)
+#----------------------------------------------------------
+
+* Non-Delivery Notification (NDN)
+
+Lhůty nejsou standardizovány
+
+- zpožděný mail typicky 4-6 hodin
+- nedoručitelný mail 4-6 dnů
+
+Týká se pouze dočasných chyb a nemožnosti spojení se serverem příjemce.
+
+U trvalých chyb (5xx) jsou NDN zaslány okamžitě.
+
+#----------------------------------------------------------
+* Bounce Messages
 
 .image data/smtp4.png _ 1000
 

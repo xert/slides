@@ -167,7 +167,7 @@ Každý blok má svůj vlastní Content-Type, charset i Content-Transfer-Encodin
 #----------------------------------------------------------
 * SMTP
 
-Protokol, zabývající se přenosem zprávy od odesílatele k příjemci.
+Protokol zabývající se přenosem zprávy od odesílatele k příjemci.
 SMTP *neřeší*vlastní*zprávu* (hlavičky, obsah), zabývá se *pouze* její *obálkou*.
 
  Protokol SMTP zprávy přenáší přes jeden ze tří TCP portů:

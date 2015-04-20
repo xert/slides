@@ -11,7 +11,7 @@ http://www.redb.cz
 * Cíl
 
 - ujasnit si fungování e-mailu
-- rozptýlení FUDů
+- rozptýlení FUD
 - dokázat vysvětlit klientům základní principy
 - reflektovat vývoj technologií při tvorbě aplikací
 
@@ -24,7 +24,7 @@ http://www.redb.cz
 *Doplňující*informace*
 
  Podrobnější a doplňující informace jsou uvedeny v takovýchto blocích.
- Budou zajímavé asi jen pro programátory a či administrátory.
+ Budou zajímavé asi jen pro programátory a administrátory.
 
 
 #----------------------------------------------------------
@@ -39,7 +39,7 @@ Neřešíme vyzvedávání pošty, ukládání do odeslaných atp.
 - Protokoly a standardy
 - Podoba e-mailu
 - Přenos e-mailů po síti
-- Zneužití e-mailů (Spam, Phishing, Viry, ...)
+- Zneužití e-mailů (spam, phishing, viry...)
 
 *Důvěryhodný*e-mail*
 
@@ -110,7 +110,7 @@ Thu, 1 Apr 2015 13:33:31 +0000 (UTC)
 #----------------------------------------------------------
 * Zpráva - obsah
 
-Vlastní obsah zprávy.
+Vlastní obsah zprávy
 
 Původně čistý ASCII text (7bit)
 
@@ -126,8 +126,8 @@ Později zejména pomocí MIME rozšíření umožněn bohatší obsah
 #----------------------------------------------------------
 * MIME
 
-U jiných zpráv, než čistě textových (tj Content-Type != text/plain) je obsah zprávy složen
-z multipart bloků, rozlišených oddělovačem definovaným jako "boundary" v hlavičce Content-Type.
+U jiných zpráv než čistě textových (tj Content-Type != text/plain) je obsah zprávy složen
+z multipart bloků rozlišených oddělovačem definovaným jako "boundary" v hlavičce Content-Type.
 
 Každý blok má svůj vlastní Content-Type, charset i Content-Transfer-Encoding.
 
@@ -324,23 +324,25 @@ Dorazí obvykle v řádu sekund.
 .image data/smtp4.png _ 1000
 
 #----------------------------------------------------------
-* Způsoby obrany proti zneužití SMTP
+* Zneužití e-mailu
 
 #----------------------------------------------------------
 * Zneužití SMTP
+
 Protokol SMTP pochází z doby, kdy se neřešila bezpečná komunikace.
 
-V současné době se nad touto stávající technologíí implementují
+V současné době se nad touto stávající technologií implementují
 nejrůznější obrany proti všemožným formám zneužití.
 
 - UCE / UBE (spam)
 - Phishing
-- Viry, ransomware
+- Viry, malware, ransomware
+- Odposlechnutí, modifikace zpráv při přenosu (MITM)
 
 První spam 1978, na vrcholu v roce 2011.
-Aktuálně cca 60% mailů je spam (25 miliard mailů denně). Dříve až 97%.
+Aktuálně cca 60 % mailů je spam (25 miliard mailů denně). Dříve až 97%.
 
-Klesající trand spamu nahrazuje phishing a přesun na sociální sítě.
+Klesající trend spamu nahrazuje phishing, malware a přesun na sociální sítě.
 
 #----------------------------------------------------------
 * Vždy o krok pozadu
@@ -355,20 +357,42 @@ Klesající trand spamu nahrazuje phishing a přesun na sociální sítě.
 *⇠* Spammer si může udělat vlastní SMTP server
 
 *⇢* Blacklisty
-*⇠* Hackování legitimních SMTP serverů a aplikací
+*⇠* Hackování legitimních SMTP serverů a aplikací; pink contracts
 
 *⇢* Analýza obsahu, statistické techniky
 *⇠* Obrázkový spam, Bayesian poisoning
 
+*⇢* OCR obrázků, heuristika
+*⇠* komplikace textu v obrázku, spam v zipu, zneužití bounce messages
+#----------------------------------------------------------
+* Šifrování spojení při SMTP přenosu
+
+Velmi účinné proti MITM útokům a odposlechu.
+
+Časté použítí při spojení Klient ⟶ SMTP
+Překvapivě málo často používané při spojení SMTP server ⟷ SMTP server.
+
+Přináší komplexnost do konfigurace a údržby
+
+- certifikáty
+- aktuálnost použitých šifer
+
+Při správném použití nijak neomezůjí ani nematou uživatele
+
+#----------------------------------------------------------
+* ...dále
+
 Následují další techniky, více či méně úspěšné.
+
 Ve výsledku všechny *omezují*uživatele* a *snižují*doručitelnost* legitimních zpráv.
 
 #----------------------------------------------------------
 * Blokace SMTP komunikace
 
-Jednou z forem obrany je blokování TCP portů používaných pro transport zpráv.
+Jednou z obran je blokování TCP portů používaných pro transport zpráv.
+
 Obecně je velmi častá blokace portu 25, porty 465 a 587 jsou blokovány zřídka.
-Na velmi veřejných místech typu letiště, internetové kavárny a knihovny je vetší pravděpodobnost blokace.
+Na veřejných místech typu letiště, internetové kavárny a knihovny je větší pravděpodobnost blokace.
 
 U veřejných míst obvykle nebývá nabízen místní SMTP server.
 U privátních (společnosti, korporace) naopak prakticky vždy ano.
@@ -384,6 +408,86 @@ U privátních (společnosti, korporace) naopak prakticky vždy ano.
   - tunelování (např. přes SSH)
 
 #----------------------------------------------------------
+* Filtrování podle obsahu
+
+*Klíčová*slova,*Heuristika*
+- En14rg3, V14gr4, ...
+- Cílové odkazy
+
+*Statistické*filtrování* (Bayesian filtering)
+- Uživatelská klasifikace
+
+*Externí*služby* (Reputační systémy)
+- Distributed Checksum Clearinghouse (DCC)
+- Vipul’s Razor
+
+*Kontrola*příloh*
+- antivirová kontrola
+- zakázané přílohy
+
+*Komplexní*analýza* (Hybridní systémy)
+- Amavis
+- SpamAssassin a podobné bodovací systémy
+
+#----------------------------------------------------------
+* Filtrování při SMTP spojení
+
+*Blacklist* - zakázané:
+- IP adresy serverů
+- identifikace serverů (HELO)
+- odesílatelé, příjemci
+
+*Whitelist*
+- explicitně povolené totéž
+- často se zpráva dále neprověřuje
+
+*DNS*Blocklist* (DNSBL)
+- blacklist formou externí služby (reputační systém)
+- dotazy pomocí DNS
+
+#----------------------------------------------------------
+* Dodržování standardů
+
+- HELO/EHLO identifikace serveru
+- Reverzní DNS k IP
+
+* Greylisting
+
+- využití dočasné chyby 451
+- triplet IP, odesílatel, příjemce
+- velmi efektivní, ale zdržuje doručení
+
+#----------------------------------------------------------
+* Obskurnější techniky
+
+*Challenge-Response*systémy*
+- CAPTCHA
+- Reply
+
+*Pasti*
+- Zvyšování nákladů spammerů
+- Automatický reporting do reputačních systémů
+
+*Honeypot*
+- často ve formě open relay
+
+*Spamtrapping*
+- skryté e-mailové adresy
+
+*Tarpit*
+- zpomalení odezvy
+
+#----------------------------------------------------------
+* Moderní techniky
+
+#----------------------------------------------------------
+
+#----------------------------------------------------------
+* SPF
 
 
-* Obrana
+#----------------------------------------------------------
+* DKIM
+
+#----------------------------------------------------------
+* DMARC

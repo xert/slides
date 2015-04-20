@@ -1,5 +1,5 @@
 Důvěryhodný e-mail
-4 Apr 2015
+23 Apr 2015
 Tags: SMTP DKIM SPF DMARC e-mail
 
 Robert Kánia
@@ -15,7 +15,7 @@ http://www.redb.cz
 - dokázat vysvětlit klientům základní principy
 - reflektovat vývoj technologií při tvorbě aplikací
 
-*Důvěryhodný*e-mail* 
+*Důvěryhodný*e-mail*
 
 - *spolehlivost* doručení e-mailů
 - *ochrana* klientů před podvodnými zprávami
@@ -106,7 +106,7 @@ Thu, 1 Apr 2015 13:33:31 +0000 (UTC)
  Obdobně jako u HTTP je možné přidávat vlastní nestandardizované hlavičky X-MojeHlavicka
 
 .caption Více viz RFC 5322 [[http://tools.ietf.org/html/rfc5322]]
-  
+
 #----------------------------------------------------------
 * Zpráva - obsah
 
@@ -128,7 +128,7 @@ Později zejména pomocí MIME rozšíření umožněn bohatší obsah
 
 U jiných zpráv, než čistě textových (tj Content-Type != text/plain) je obsah zprávy složen
 z multipart bloků, rozlišených oddělovačem definovaným jako "boundary" v hlavičce Content-Type.
-  
+
 Každý blok má svůj vlastní Content-Type, charset i Content-Transfer-Encoding.
 
  ...
@@ -165,7 +165,7 @@ Každý blok má svůj vlastní Content-Type, charset i Content-Transfer-Encodin
 .image data/smtp3.png _ 1000
 
 #----------------------------------------------------------
-* SMTP 
+* SMTP
 
 Protokol, zabývající se přenosem zprávy od odesílatele k příjemci.
 SMTP *neřeší*vlastní*zprávu* (hlavičky, obsah), zabývá se *pouze* její *obálkou*.
@@ -266,58 +266,57 @@ Potvrzení o
 #----------------------------------------------------------
 * Doručení zprávy
 
+Při zapnutí DSN v mailovém klientovi.
+Dorazí obvykle v řádu sekund.
+
   This is the mail system at host mail.redb.cz.
-  
+
   Your message was successfully delivered to the destination(s)
   listed below. If the message was delivered to mailbox you will
   receive no further notifications. Otherwise you may still receive
   notifications of mail delivery errors from other systems.
-  
+
                      The mail system
-  
+
   <xert.cz@gmail.com>: delivery via gmail-smtp-in.l.google.com[74.125.136.26]:25:
       250 2.0.0 OK 1429517536 p1si30874666wjp.207 - gsmtp
 
 #----------------------------------------------------------
 * Zpoždění zprávy
 
+Pokud se doručení nedaří (s dočasnou chybou) delší čas.
+Čas není definován žádným standardem, obvykle 4-6 hodin.
+
  This is an automatically generated Delivery Status Notification.
- 
+
  THIS IS A WARNING MESSAGE ONLY.
  YOU DO NOT NEED TO RESEND YOUR MESSAGE.
- 
+
  Delivery to the following recipients has been delayed.
+
+Pokud se dále doručení nedaří - obvykle 4-6 dnů - je následně zaslána zpráva o nedoručení.
 
 #----------------------------------------------------------
 * Nedoručení zprávy
+
+Pokud se doručení nezdařilo s trvalou chybou.
+Dorazí obvykle v řádu sekund.
 
  This is the mail system at host mail.redb.cz.
 
  I'm sorry to have to inform you that your message could not
  be delivered to one or more recipients. It's attached below.
- 
+
  For further assistance, please send mail to postmaster.
- 
+
  If you do so, please include this problem report. You can
  delete your own text from the attached returned message.
- 
+
                     The mail system
- 
+
  <test-neexistujici-schranky@seznam.cz>: host mx1.seznam.cz[77.75.76.42] said:
      550 5.1.1 Sorry, no mailbox here by that name. (in reply to RCPT TO
      command)
-#----------------------------------------------------------
-
-* Non-Delivery Notification (NDN)
-
-Lhůty nejsou standardizovány
-
-- zpožděný mail typicky 4-6 hodin
-- nedoručitelný mail 4-6 dnů
-
-Týká se pouze dočasných chyb a nemožnosti spojení se serverem příjemce.
-
-U trvalých chyb (5xx) jsou NDN zaslány okamžitě.
 
 #----------------------------------------------------------
 * Bounce Messages
@@ -332,7 +331,7 @@ U trvalých chyb (5xx) jsou NDN zaslány okamžitě.
 Protokol SMTP pochází z doby, kdy se neřešila bezpečná komunikace.
 
 V současné době se nad touto stávající technologíí implementují
-nejruůznější obrany proti všemožným formám zneužití.
+nejrůznější obrany proti všemožným formám zneužití.
 
 - UCE / UBE (spam)
 - Phishing
@@ -355,8 +354,14 @@ Klesající trand spamu nahrazuje phishing a přesun na sociální sítě.
 *⇢* SMTP autentizace řeší zneužití konkrétního serveru
 *⇠* Spammer si může udělat vlastní SMTP server
 
-*⇢* Reputační systémy
-*⇠* Spammer si může udělat vlastní SMTP server
+*⇢* Blacklisty
+*⇠* Hackování legitimních SMTP serverů a aplikací
+
+*⇢* Analýza obsahu, statistické techniky
+*⇠* Obrázkový spam, Bayesian poisoning
+
+Následují další techniky, více či méně úspěšné.
+Ve výsledku všechny *omezují*uživatele* a *snižují*doručitelnost* legitimních zpráv.
 
 #----------------------------------------------------------
 * Blokace SMTP komunikace
@@ -374,23 +379,11 @@ U privátních (společnosti, korporace) naopak prakticky vždy ano.
 - VPN
 
   Pro ajťáky:
-  
+
   - nestandardní SMTP port na vlastním serveru
   - tunelování (např. přes SSH)
 
 #----------------------------------------------------------
-* 
 
-*⇢* SMTP servery umožnují autentizaci, tyto můzu používat odkudkoliv
-_Problém_: 
 
-*⇠* dfds
-
-*vždy*krok*za*spammery*
-Zavedeme blacklisty - Spammeři hackují cizí SMTP servery
-Hledáme slovo Viagra - Spameři pošlou obrázek
-Zavádíme statistické techniky - Odpovědí je Bayesian poisoning
-
-#----------------------------------------------------------
 * Obrana
-

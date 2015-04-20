@@ -325,28 +325,38 @@ U trvalých chyb (5xx) jsou NDN zaslány okamžitě.
 .image data/smtp4.png _ 1000
 
 #----------------------------------------------------------
-* UCE / UBE / Phishing / Viry
+* Způsoby obrany proti zneužití SMTP
 
 #----------------------------------------------------------
-* Historie spamu
+* Zneužití SMTP
+Protokol SMTP pochází z doby, kdy se neřešila bezpečná komunikace.
 
-*➜* SMTP servery jsou otevřené pro kohokoliv
-_Problém_: Kdokoliv může poslat mail komukoliv přes libovolný server pod libovolnou identitou
+V současné době se nad touto stávající technologíí implementují
+nejruůznější obrany proti všemožným formám zneužití.
 
-_bráníme_se_
-Povoleno posílat pouze přes SMTP server svého providera
-_Problém_: Mám notebook a měním místo připojení několikrát za den
+- UCE / UBE (spam)
+- Phishing
+- Viry, ransomware
 
-*➜* SMTP servery umožnují autentizaci, tyto můzu používat odkudkoliv
-_Problém_: Spammer si může udělat vlastní SMTP přes který posílá
+První spam 1978, na vrcholu v roce 2011.
+Aktuálně cca 60% mailů je spam (25 miliard mailů denně). Dříve až 97%.
 
-*vždy*krok*za*spammery*
-Zavedeme blacklisty - Spammeři hackují cizí SMTP servery
-Hledáme slovo Viagra - Spameři pošlou obrázek
-Zavádíme statistické techniky - Odpovědí je Bayesian poisoning
+Klesající trand spamu nahrazuje phishing a přesun na sociální sítě.
 
 #----------------------------------------------------------
-* Obrana
+* Vždy o krok pozadu
+
+*⇢* SMTP servery jsou otevřené pro kohokoliv
+*⇠* Kdokoliv může poslat mail komukoliv přes libovolný server pod libovolnou identitou
+
+*⇢* Povoleno posílat pouze přes SMTP server svého providera
+*⇠* Mobilní uživatelé měnící často místo připojení musí měnit SMTP server
+
+*⇢* SMTP autentizace řeší zneužití konkrétního serveru
+*⇠* Spammer si může udělat vlastní SMTP server
+
+*⇢* Reputační systémy
+*⇠* Spammer si může udělat vlastní SMTP server
 
 #----------------------------------------------------------
 * Blokace SMTP komunikace
@@ -359,12 +369,28 @@ U veřejných míst obvykle nebývá nabízen místní SMTP server.
 U privátních (společnosti, korporace) naopak prakticky vždy ano.
 
 *Možnosti*obejití*blokace*
-Pro laiky:
 
 - webmail
 - VPN
 
-Pro ajťáky:
+  Pro ajťáky:
+  
+  - nestandardní SMTP port na vlastním serveru
+  - tunelování (např. přes SSH)
 
-- nestandardní SMTP port na vlastním serveru
-- tunelování (např. přes SSH)
+#----------------------------------------------------------
+* 
+
+*⇢* SMTP servery umožnují autentizaci, tyto můzu používat odkudkoliv
+_Problém_: 
+
+*⇠* dfds
+
+*vždy*krok*za*spammery*
+Zavedeme blacklisty - Spammeři hackují cizí SMTP servery
+Hledáme slovo Viagra - Spameři pošlou obrázek
+Zavádíme statistické techniky - Odpovědí je Bayesian poisoning
+
+#----------------------------------------------------------
+* Obrana
+

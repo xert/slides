@@ -384,8 +384,9 @@ Při správném použití nijak neomezují ani nematou uživatele.
 * ...dále
 
 Následují další techniky, více či méně úspěšné.
+Ve výsledku většinou *omezují*uživatele* a *snižují*doručitelnost* legitimních zpráv.
 
-Ve výsledku všechny *omezují*uživatele* a *snižují*doručitelnost* legitimních zpráv.
+.image data/filtrace.png 550 _
 
 #----------------------------------------------------------
 * Blokace SMTP komunikace

@@ -345,7 +345,22 @@ Aktuálně cca 60 % mailů je spam (25 miliard mailů denně). Dříve až 97%.
 Klesající trend spamu nahrazuje phishing, malware a přesun na sociální sítě.
 
 #----------------------------------------------------------
-* Vždy o krok pozadu
+* Šifrování spojení při SMTP přenosu
+
+Velmi účinné proti MITM útokům a odposlechu.
+
+Časté použítí při spojení Klient ⟶ SMTP
+Překvapivě málo často používané při spojení SMTP server ⟷ SMTP server.
+
+Přináší komplexnost do konfigurace a údržby
+
+- certifikáty
+- aktuálnost použitých šifer
+
+Při správném použití nijak neomezují ani nematou uživatele.
+
+#----------------------------------------------------------
+* Nekončící závod
 
 *⇢* SMTP servery jsou otevřené pro kohokoliv
 *⇠* Kdokoliv může poslat mail komukoliv přes libovolný server pod libovolnou identitou
@@ -364,21 +379,6 @@ Klesající trend spamu nahrazuje phishing, malware a přesun na sociální sít
 
 *⇢* OCR obrázků, heuristika
 *⇠* komplikace textu v obrázku, spam v zipu, zneužití bounce messages
-
-#----------------------------------------------------------
-* Šifrování spojení při SMTP přenosu
-
-Velmi účinné proti MITM útokům a odposlechu.
-
-Časté použítí při spojení Klient ⟶ SMTP
-Překvapivě málo často používané při spojení SMTP server ⟷ SMTP server.
-
-Přináší komplexnost do konfigurace a údržby
-
-- certifikáty
-- aktuálnost použitých šifer
-
-Při správném použití nijak neomezují ani nematou uživatele.
 
 #----------------------------------------------------------
 * ...dále
@@ -452,11 +452,14 @@ U privátních (společnosti, korporace) naopak prakticky vždy ano.
 - HELO/EHLO identifikace serveru
 - Reverzní DNS k IP
 
-* Greylisting
+*Greylisting*
 
 - využití dočasné chyby 451
-- triplet IP, odesílatel, příjemce
+- _triplet_ IP - odesílatel - příjemce
 - velmi efektivní, ale zdržuje doručení
+- špatně se vysvětluje klientům
+
+.image data/greylisting.png
 
 #----------------------------------------------------------
 * Obskurnější techniky
@@ -479,7 +482,12 @@ U privátních (společnosti, korporace) naopak prakticky vždy ano.
 - zpomalení odezvy
 
 #----------------------------------------------------------
-* Moderní techniky
+* Přestávka
+
+.image data/mindblown.gif _ 1000
+
+#----------------------------------------------------------
+* SPF - Sender Policy Framework
 
 #----------------------------------------------------------
 * SPF - Sender Policy Framework
@@ -487,29 +495,34 @@ U privátních (společnosti, korporace) naopak prakticky vždy ano.
 _Technologie_z_roku_2003_
 
 - řeší pouze *obálku* zprávy, nezabývá se jejím obsahem
-- realizováno jako DNS záznam
-  example.org IN TXT "v=spf1"
-- určuje jaké IP adresy mohou odesílat poštu *z*této*domény*
 - na straně příjemce je možné zpracování během SMTP komunikace nebo až později (např. v hybridním systému)
+- obrana zejména proti phishingu, spam příliš neřeší
 
-Poměrně kontroverzní technologie, bohužel technicky nedotažená do konce.
-Šanci na standardizaci zvyšuje podpora velkých společností.
+Mírně kontroverzní technologie, zejména proto, že není nedotažená do konce.
+
+Šanci na zlepšení zvyšuje podpora velkých společností (Sender ID - SPFv2)
+
+#----------------------------------------------------------
+* Princip SPF
+
+- realizováno jako DNS záznam
+- určuje jaké *IP*adresy* mohou odesílat poštu *z*této*domény*
+
+.image data/spf1.png _ 1024
 
 #----------------------------------------------------------
 * SPF Syntaxe
+
+ example.org IN TXT "v=spf1"
 
 U adres je definována jedna z možností, jak se má k tomuto odesílateli chovat.
 
 - může odesílat poštu (výchozí, používá se identifikátor `+`)
 - není definováno (`?`)
 - nesmí posílat poštu (`-`)
-- neměl by posílat poštu (testovací režim `~`)
+- neměl by posílat poštu (`~`)
 
-Pokud není záznam uveden, odpovídá to záznamu
-
-  v=spf1 ?all
-
-Tedy pro všechny adresy není definováno chování.
+Pokud není záznam uveden, odpovídá to záznamu ? pro všechny IP
 Příjemce zpracovávající SPF by měl přijmout e-mail ode všech serverů.
 
 Úspěšné ověření SPF přidá hlavičku do e-mailu:
@@ -565,46 +578,36 @@ V tomto režimu jsou nevyhovující zprávy doručeny, ale jsou v hlavičkách p
 - Ostatní adresy jsou v testovacím režimu
 
 #----------------------------------------------------------
-* Možnosti zneužití
-
-*Spam*
-Pro zasílání spamu si může spammer zaregistrovat doménu,
-ve které definuje (pokud vůbec) záznam povolující odesílání z jakékoliv adresy
-
-  v=spf1 +all
-
-*Phishing*
-Proti phishingu je SPF relativně dobrou obranou,
-pokud se útočník nerozhodne použít doménu podobnou službě, za kterou se vydává.
-
-#----------------------------------------------------------
 * Problémy SPF
 
-- jiné SMTP servery
+- nutnost použít pouze určené SMTP servery
 - zneužití v rámci domény (zejména problém freemailů)
 - přesměrování pošty
 - pošta odesílaná z aplikací (zejména webových)
 
 #----------------------------------------------------------
-* Jiné SMTP servery
-
-Při nasazení SPF se musí zajistit, že všichni legitimní odesílatelé z domény používají výhradně SMTP servery definované v SPF politice.
-
-Při použití jiného SMTP serveru nebude odeslaná pošta doručována.
-
-#----------------------------------------------------------
-* Přesměrování pošty
+* Normální SPF
 
 - Alice zavede přísné SPF na alice.org
-- Bob má schránku na bob.org ale přesměrovává si ji na seznam.cz
-- Seznam.cz kontroluje SPF
 
-Pošta od Alice nikdy Bobovi na seznam.cz nedorazí.
+.image data/spf2.png _ 1024
+
+#----------------------------------------------------------
+* SPF s přesměrováním
+
+- Bob si schránku bob.org přesměruje na seznam.cz
+- Pošta od Alice mu od této chvíle přestane chodit
+
+.image data/spf3.png _ 1024
 
 #----------------------------------------------------------
 * Možnosti řešení přesměrování pošty
 
 *Alice* zjemní politiku SPF na soft-fail
+
+*Seznam.cz*
+
+- umožní Bobovi nastavit Whitelist na maily z bob.org či přesměrované maily obecně.
 
 *Bob* na serveru bob.org se zmení způsob přesměrovánání SPF pošty
 
@@ -613,9 +616,6 @@ Pošta od Alice nikdy Bobovi na seznam.cz nedorazí.
   551 User not local; please try <bob@seznam.cz>
 - Server Rewriting Scheme (SRS)
 
-*Seznam.cz*
-
-- umožní Bobovi nastavit Whitelist na maily z bob.org či přesměrované maily obecně.
 
 #----------------------------------------------------------
 * Server Rewriting Scheme (SRS)
@@ -678,23 +678,39 @@ Pošta od Alice nikdy Bobovi na seznam.cz nedorazí.
 #----------------------------------------------------------
 * DKIM - DomainKeys Identified Mail
 
+#----------------------------------------------------------
+* DKIM - DomainKeys Identified Mail
+
 _Technologie_z_roku_2007_
 
-- DKIM je podpis zprávy, řeší pouze *obsah* zprávy, nezabývá se její obálkou
+- DKIM je *podpis*zprávy*, který řeší pouze její *obsah*, nezabývá se obálkou
+- pracuje na principu asymetrické kryptografie
 - nestanovuje, co se má s neplatným podpisem dít
-- realizováno jako jeden či více DNS záznamů
-  SELEKTOR._domainkey.example.org IN TXT "v=DKIM1; ..."
-
-a hlavička e-mailu
-
-  DKIM-Signature:
-- selektorů může být libovolné množství
 - na straně příjemce je možné zpracování až po přijetí kompletní zprávy
-- funkční a použitelná technologie
 - lze si představit jako S/MIME (el. podpis) na serveru, není s ním však zaměnitelný
+
+Funkční, použitelná a běžně používaná technologie.
+
+Přesto ještě poměrně mladá a stále se vyvíjející.
+
+#----------------------------------------------------------
+* Princip DKIM
+
+.image data/dkim1.png _ 1024
+
+#----------------------------------------------------------
+* DKIM selektory
+
+- neexistuje standardní selektor; u zprávy nevíme, že měla být podepsána
+
+.image data/dkim2.png 500 _
 
 #----------------------------------------------------------
 * DKIM Syntaxe
+
+- DKIM je realizováno jako jeden či více DNS záznamů
+  SELEKTOR._domainkey.example.org IN TXT "v=DKIM1; ..."
+- selektorů může být libovolné množství
 
 V DNS se definují parametry
 
@@ -703,12 +719,10 @@ V DNS se definují parametry
 
 Je možené definovat další parametry jako
 
-- hashovací algoritmus (SHA1, SHA256)
-- podporované klíče (RSA)
-- poznámka (pokud bývá uvedena tak URL s popisem služby)
-- revokaci starého klíče
 - vyznačení testovacího provozu
-- zacházení se subdoménami
+- hashovací algoritmus (SHA1, SHA256), podporované klíče (RSA)
+- poznámka (pokud bývá uvedena tak URL s popisem služby)
+- revokaci starého klíče, zacházení se subdoménami
 
 #----------------------------------------------------------
 * DKIM ve zprávě
@@ -821,6 +835,4 @@ Analyze the data and modify your mail streams as appropriate.
 Modify your DMARC policy flags from “none” to “quarantine” to “reject” as you gain experience.
 
 #----------------------------------------------------------
-* Ještě nějaký slide
-
-.image data/mindblown.gif _ 1000
+* AFRF and Abuse Reporting

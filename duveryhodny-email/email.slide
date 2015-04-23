@@ -357,7 +357,7 @@ nejrůznější obrany proti všemožným formám zneužití.
 - Odposlechnutí, modifikace zpráv při přenosu (MITM)
 
 První spam 1978, na vrcholu v roce 2011.
-Aktuálně cca 60 % mailů je spam. Dříve až 97%.
+Aktuálně cca 60 % mailů je spam. Dříve až 97 %.
 
 Klesající trend spamu nahrazuje phishing, malware a přesun na sociální sítě.
 
@@ -835,7 +835,7 @@ _Technologie_z_roku_2011_
 DMARC prozatím určuje politiku pro SPF a/nebo DKIM, do budoucna je otevřená dalším metodám.
 
 - Microsoft, Google, Yahoo!, AOL, Comcast
-- Chráněno 80% of USA schránek, 60% celosvětově
+- Chráněno 80 % of USA schránek, 60 % celosvětově
 
 #----------------------------------------------------------
 * DMARC Princip
@@ -890,5 +890,5 @@ DMARC prozatím určuje politiku pro SPF a/nebo DKIM, do budoucna je otevřená 
 - Publikovat DMARC záznam s politikou nastavenou na `none`, nízkým procentem zpracovávaných zpráv a příjmem reportů
 - Zavést analýzu reportů
 - Zvyšovat procento zpracovávaných zpráv, upravovat případné chyby odhalené reporty
-- Po dosažení 100% zpřísnit politiku na `quarantine`
+- Po dosažení 100 % zpřísnit politiku na `quarantine`
 - Po čase zpřísnit politiku na `reject`

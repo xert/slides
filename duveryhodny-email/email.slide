@@ -65,6 +65,23 @@ Neřešíme vyzvedávání pošty, ukládání do odeslaných atp.
 - *2008*-*revize*ESMTP* (RFC 5321 - _DRAFT_STANDARD_)
 
 #----------------------------------------------------------
+* Statistika
+
+*2012*
+
+- 2.1 miliardy uživatelů e-mailu
+- 144 miliard e-mailů denně
+- obchody přes e-mail překročily hodnotu 8 miliard USD
+
+*2016* (předpověď)
+
+- 2.7 miliardy uživatelů e-mailu
+- více než 200 miliard e-mailů denně
+- obchody v hodnotě více než 12 miliard USD
+
+.caption Email Statistics Report, 2013-2017, The Radicati Group. Apr 22nd, 2013 [[http://www.radicati.com/?p=9659]]
+
+#----------------------------------------------------------
 * Co je e-mail
 
 #----------------------------------------------------------
@@ -150,7 +167,7 @@ Každý blok má svůj vlastní Content-Type, charset i Content-Transfer-Encodin
 * Cesta e-mailu od odesílatele k příjemci
 
 #----------------------------------------------------------
-* Simple Mail Transfer Protocol
+* SMTP - Simple Mail Transfer Protocol
 
 .image data/smtp1.png _ 1000
 
@@ -340,7 +357,7 @@ nejrůznější obrany proti všemožným formám zneužití.
 - Odposlechnutí, modifikace zpráv při přenosu (MITM)
 
 První spam 1978, na vrcholu v roce 2011.
-Aktuálně cca 60 % mailů je spam (25 miliard mailů denně). Dříve až 97%.
+Aktuálně cca 60 % mailů je spam. Dříve až 97%.
 
 Klesající trend spamu nahrazuje phishing, malware a přesun na sociální sítě.
 
@@ -736,15 +753,14 @@ Do zprávy se na SMTP serveru přidá hlavička `DKIM-Signature`, např.:
      bh=MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=;
      b=dzdVyOfAKCdLXdJOc9G2q8LoXSlEniSbav+yuU4zGeeruD00lszZVoG4ZHRNiYzR
 
+- *d* doména nemusí být stejná jako ve *From:* hlavičce
 - *v* je verze DKIM
-- *a* použitý algoritmus podpisu
 - *c* způsob kanonizace hlaviček a těla zprávy
-- *q* metoda zjištění veřejného klíče
 - *l* délka podepsané části těla zprávy
-- *t* časová značka okamžiku podpisu
 - *x* časová značka vypršení podpisu
 - *h* seznam podepsaných hlaviček, lze uvést i neexistující
-
+- *a* použitý algoritmus podpisu
+- ...
 #----------------------------------------------------------
 * Přínosy DKIM
 
@@ -758,9 +774,9 @@ Do zprávy se na SMTP serveru přidá hlavička `DKIM-Signature`, např.:
 
 *1.* Spammer může vytvořit na legitimním serveru zprávu a tu rozesílat
 
-- pomůže nepoužívat *l* značku a naopak používat *x* značku
+- pomůže nepoužívat *l* (lenght) značku a naopak používat *x* (expires) značku
 
-*2.* Neplatnost podpisu  při modifikaci hlaviček/těla serverem po cestě
+*2.* Neplatnost podpisu při modifikaci hlaviček/těla serverem po cestě
 
 - částečně řeší kanonizace
 
@@ -769,6 +785,11 @@ Do zprávy se na SMTP serveru přidá hlavička `DKIM-Signature`, např.:
 - hlášení antivirů a disclaimery nutno přidávat před podpisem zprávy na serveru
 - e-mailové konference nemají jednoduché řešení, nutno řešit na straně konference
 
+*4.* Použití slabých klíčů bez rotace
+
+- slabší klíče než 1024 bitů je možné prolomit v řádu hodin/dnů
+- gmail.com používal 512 bitové klíče, nyní 2048
+- vhodné využít selektory pro umožnění rotací klíčů
 #----------------------------------------------------------
 * ADSP - Author Domain Signing Practices
 
@@ -786,7 +807,7 @@ Může nabývat tří hodnot
 - *all*         - všechny zprávy z domény by měly být podepsány
 - *discardable* - nepodepsané zprávy je možné zahazovat
 
-ADSP není důvod nepoužít, byť jeho funkci pomalu přebírá technologie DMARC
+ADSP není důvod nepoužít, byť jeho funkci pomalu přebírá technologie DMARC.
 
 #----------------------------------------------------------
 * Doporučení pro implementaci
@@ -799,41 +820,75 @@ ADSP není důvod nepoužít, byť jeho funkci pomalu přebírá technologie DMA
 - definovat platnost zprávy
 - podpepisovat všechny hlavičky e-mailu a celou zprávu
 - kombinovat s korektně implementovaným ADSP, SPF a DMARC, DNSSEC
+- nespoléhat, že nepodepsaný mail projde (reputační systemy, velcí provideři mailů)
 
 #----------------------------------------------------------
 * DMARC
 
 _Technologie_z_roku_2011_
 
-- Umožňuje *odesílatelům* definovat politiku pro maily z jejich domén
-- Umožňuje *příjemcům* ověřovat přijímané e-maily a zasílat odesílatelům reporty doručených mailů.
+- "Nadstavba" nad SPF a DKIM
+- Přínosná i pro odílatele
+- Umožňuje *příjemcům* ověřovat přijímané e-maily a zasíláním hlášení snižovat objem příchozí nevyžádané pošty
+- Umožňuje *odesílatelům* definovat politiku pro maily z jejich domén a na základě analýzy hlášení odhalovat chyby s doručením legitimních mailů
 
-DMARC určuje politiku pro SPF a/nebo DKIM.
+DMARC prozatím určuje politiku pro SPF a/nebo DKIM, do budoucna je otevřená dalším metodám.
+
+- Microsoft, Google, Yahoo!, AOL, Comcast
+- Chráněno 80% of USA schránek, 60% celosvětově
+
+#----------------------------------------------------------
+* DMARC Princip
+
+- Zkoumá, zda hlavička *From:* je platná pro danou *doménu* (SPF nebo DKIM test)
+- Příjemci zasílají hlášení odesílatelům
+
+.image data/dmarc.png 500 _
 
 #----------------------------------------------------------
 * DMARC Syntaxe
 
- v	Protocol version	v=DMARC1
- pct	Percentage of messages subjected to filtering	pct=20
- ruf	Reporting URI for forensic reports	ruf=mailto:authfail@example.com
- rua	Reporting URI of aggregate reports	rua=mailto:aggrep@example.com
- p	Policy for organizational domain	p=quarantine
- sp	Policy for subdomains of the OD	sp=reject
- adkim	Alignment mode for DKIM	adkim=s
- aspf	Alignment mode for SPF	aspf=r
+  v     - verze protokolu	v=DMARC1
+  pct	  - procento zpráv určených k filtrování	pct=20
+  ruf	  - URI pro zasílání hlášení selhání DMARC pro jednotlivou zprávu ruf=mailto:authfail@example.com
+  rua	  - URI pro zasílání souhrných reportů	rua=mailto:aggrep@example.com
+  p	    - politika domény	p=quarantine
+  sp	  - politika pro subdomény	sp=reject
+  adkim	- režim pro DKIM	adkim=s
+  aspf	- režim pro SPF	aspf=r
 
-How Senders Deploy DMARC in 5-Easy Steps
+- Možné určit procento zpráv, které se mají prověřovat
+- Adresy pro zasílání hlášení (možné i v jiné doméně)
+- Politika domény (none, quarantine, reject)
+- Režim (relax, strict)
+
+#----------------------------------------------------------
+* Obsah hlášení
+
+- Společnost zasílající report, kontakt
+- Publikovaná politika
+- IP adresy které posílaly mail pro danou doménu
+- Počty zpráv z těchto IP adres
+- Výsledek SPF kontroly
+- Výsledek DKIM kontroly
+- Další nakládání se zprávou (doručeno, odmítnuto, ...)
+
+  <record>
+    <row><source_ip>72.150.241.94</source_ip><count>2</count></row>
+    <identifiers><header_from>example.com</header_from></identifiers>
+    <auth_results>
+      <dkim>
+        <domain>example.com</domain>
+        <result>fail</result>
+  ...
 
 #----------------------------------------------------------
 * Postup zavedení
 
-DMARC has been designed based on real-world experience by some of the world’s largest email senders and receivers deploying SPF and DKIM. The specification takes into account the fact that it is nearly impossible for an organization to flip a switch to production. There are a number of built-in methods for “throttling” the DMARC processing so that all parties can ease into full deployment over time.
-
-Deploy DKIM & SPF. You have to cover the basics, first.
-Ensure that your mailers are correctly aligning the appropriate identifiers.
-Publish a DMARC record with the “none” flag set for the policies, which requests data reports.
-Analyze the data and modify your mail streams as appropriate.
-Modify your DMARC policy flags from “none” to “quarantine” to “reject” as you gain experience.
-
-#----------------------------------------------------------
-* AFRF and Abuse Reporting
+- Implementace DKIM a SPF
+- Kontrola odesílatelů a aplikací (`From:` hlavička)
+- Publikovat DMARC záznam s politikou nastavenou na `none`, nízkým procentem zpracovávaných zpráv a příjmem reportů
+- Zavést analýzu reportů
+- Zvyšovat procento zpracovávaných zpráv, upravovat případné chyby odhalené reporty
+- Po dosažení 100% zpřísnit politiku na `quarantine`
+- Po čase zpřísnit politiku na `reject`

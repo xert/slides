@@ -473,7 +473,7 @@ U privátních (společnosti, korporace) naopak prakticky vždy ano.
 *Greylisting*
 
 - využití dočasné chyby 451
-- _triplet_ IP - odesílatel - příjemce
+- _triplet_ *IP*odesílatele* - *mail*odesílatele* - *mail*příjemce*
 - velmi efektivní, ale zdržuje doručení
 - špatně se vysvětluje klientům
 
@@ -735,7 +735,7 @@ V DNS se definují parametry
 - *selektor*
 - *veřejná*část*klíče*
 
-Je možené definovat další parametry jako
+Je možné definovat další parametry jako
 
 - vyznačení testovacího provozu
 - hashovací algoritmus (SHA1, SHA256), podporované klíče (RSA)
@@ -774,7 +774,7 @@ Do zprávy se na SMTP serveru přidá hlavička `DKIM-Signature`, např.:
 
 *1.* Spammer může vytvořit na legitimním serveru zprávu a tu rozesílat
 
-- pomůže nepoužívat *l* (lenght) značku a naopak používat *x* (expires) značku
+- pomůže nepoužívat *l* (length) značku a naopak používat *x* (expires) značku
 
 *2.* Neplatnost podpisu při modifikaci hlaviček/těla serverem po cestě
 
@@ -892,3 +892,39 @@ DMARC prozatím určuje politiku pro SPF a/nebo DKIM, do budoucna je otevřená 
 - Zvyšovat procento zpracovávaných zpráv, upravovat případné chyby odhalené reporty
 - Po dosažení 100 % zpřísnit politiku na `quarantine`
 - Po čase zpřísnit politiku na `reject`
+
+#----------------------------------------------------------
+* Materiály
+
+*SMTP*
+
+- [[https://tools.ietf.org/html/rfc821]]
+- [[https://tools.ietf.org/html/rfc2821]]
+- [[https://tools.ietf.org/html/rfc5321]]
+
+*E-mailová*zpráva*
+
+- [[https://tools.ietf.org/html/rfc822]]
+- [[https://tools.ietf.org/html/rfc2822]]
+- [[https://tools.ietf.org/html/rfc5322]]
+
+#----------------------------------------------------------
+* Materiály
+
+*SPF*
+
+- [[http://www.openspf.org]]
+- [[https://tools.ietf.org/html/rfc7208]]
+- [[http://mxtoolbox.com/spf.aspx]]
+
+*DKIM*
+
+- [[http://www.dkim.org]]
+- [[https://tools.ietf.org/html/rfc6376]]
+- [[http://mxtoolbox.com/dkim.aspx]]
+
+*DMARC*
+
+- [[http://dmarc.org]]
+- [[https://tools.ietf.org/html/rfc7489]]
+- [[http://mxtoolbox.com/dmarc.aspx]]

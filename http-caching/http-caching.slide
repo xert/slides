@@ -1,0 +1,36 @@
+HTTP & Caching
+18 Sep 2016
+Tags: HTTP Caching Headers Varnish
+
+Robert Kánia
+redb, s.r.o.
+rk@redb.cz
+http://www.redb.cz
+
+#----------------------------------------------------------
+* Cíl
+
+- rekapitulace HTTP protokolu
+- pochopit jak funguje cachování
+- naučit se pracovat cache headers v HTTP
+- ukázka základů s Varnish cache
+
+#----------------------------------------------------------
+
+* Obsah
+
+Předmětem je HTTP cachování.
+Kromě nutného sjednocení na základech neřešíme další vlastnosti HTTP
+
+*Základy*
+
+- Co je HTTP
+- Prostředky a jejich reprezentace
+- Request a Response
+
+*Caching*
+
+- Charakter HTTP
+- HTTP hlavičky související s cachováním
+- Co dokáže Varnish Cache Language (VCL)
+

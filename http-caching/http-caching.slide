@@ -20,12 +20,12 @@ http://www.redb.cz
 * Obsah
 
 Předmětem je HTTP cachování.
-Kromě nutného sjednocení na základech neřešíme další vlastnosti HTTP
+Kromě nutného sjednocení na základech neřešíme další vlastnosti HTTP.
 
 *Základy*
 
 - Co je HTTP
-- Prostředky a jejich reprezentace
+- Zdroje a jejich reprezentace
 - Request a Response
 
 *Caching*
